@@ -272,6 +272,219 @@
     </section>
 
 </section>
+
+<section>
+    <section>
+        <h3>Saving time in production code</h3>
+
+        <p>Let's say we have a model</p>
+
+        <img src="images/classes.png">
+
+        <p class="fragment">
+            <small>
+                ... we can't change it
+            </small>
+        </p>
+        <p class="fragment">
+            <small>
+                ... we get a list of UglyJavaModel objects
+            </small>
+        </p>
+        <p class="fragment">
+            <small>
+                ... anything can be null
+            </small>
+        </p>
+    </section>
+
+    <section>
+        <h3>Requirements</h3>
+
+        <p>
+            someone said:
+        </p>
+        <ul>
+            <li>
+                count with <strong>theAllImportantBoolean</strong> true
+            </li>
+            <li>
+                top three sorted by <strong>someMonetaryValue</strong>
+            </li>
+        </ul>
+    </section>
+
+    <section>
+        <h3>Java</h3>
+
+        <p>
+            Let's just count those they want
+        </p>
+        <pre>
+            <code data-trim contenteditable>
+final List&lt;UglyJavaModel&gt; list = thirdPartyService.onlyWayToGetData();
+
+int countOfThoseWithBooleanTrue = 0;
+
+for (final UglyJavaModel uglyJavaModel : list) {
+  if (uglyJavaModel.getNested() != null
+      && uglyJavaModel.getNested().getNested() != null
+      && uglyJavaModel.getNested().getNested().getNested() != null
+      && uglyJavaModel.getNested().getNested().getNested()
+        .getTheAllImportantBoolean() == true) {
+
+    countOfThoseWithBooleanTrue++;
+  }
+}
+model.addAttribute("countWithBooleanTrue", countOfThoseWithBooleanTrue);
+            </code>
+        </pre>
+        <p>
+            <small>Java can do better, but...</small>
+        </p>
+    </section>
+
+    <section>
+        <h3>Java</h3>
+
+        <p>
+            And just top three
+        </p>
+        <pre>
+            <code data-trim contenteditable>
+final List&lt;UglyJavaModel&gt; list = thirdPartyService.onlyWayToGetData();
+
+list.sort(new Comparator&lt;UglyJavaModel>() {
+  @Override
+  public int compare(final UglyJavaModel left, final UglyJavaModel right) {
+    return left.getNested().getSomeMonetaryValue()
+      .compareTo(right.getNested().getSomeMonetaryValue());
+  }
+});
+
+final List&lt;String&gt; topThree = new ArrayList&lt;String&gt;(3);
+for (final UglyJavaModel uglyJavaModel : list.subList(0, 3)) {
+  topThree.add(uglyJavaModel.getSomeName());
+}
+model.addAttribute("topThree", topThree);
+            </code>
+        </pre>
+    </section>
+
+    <section>
+        <h3>Groovy</h3>
+        <p>
+            I know, this is boring
+        </p>
+        <pre>
+            <code data-trim contenteditable>
+def list = thirdPartyService.onlyWayToGetData()
+
+model.addAttribute("countWithBooleanTrue", list.count {
+  it?.nested?.nested?.nested?.theAllImportantBoolean
+})
+
+model.addAttribute("topThree", list.sort {
+    a, b -&gt;
+  a.nested.someMonetaryValue &lt;=&gt; b.nested.someMonetaryValue
+}[0..2]*.someName)
+            </code>
+        </pre>
+    </section>
+</section>
+
+<section>
+    <section>
+        <h3>Testing</h3>
+
+        <p>
+            JUnit is good enough
+        </p>
+        <p class="fragment">
+            ... but we still have to write a lot of code
+        </p>
+        <p class="fragment">
+            ... and we need a lot of libraries
+        </p>
+    </section>
+
+
+    <section>
+        <h3>Why Groovy</h3>
+        <p>
+            simpler asserts
+        </p>
+        <p>
+            dynamic groovy
+        </p>
+        <p>
+            less code
+        </p>
+    </section>
+
+    <section>
+        <h3>Classic JUnit4 test</h3>
+
+        <pre>
+            <code data-trim contenteditable>
+            </code>
+        </pre>
+    </section>
+
+    <section>
+        <h3>Same test, Groovy Way</h3>
+
+        <pre>
+            <code data-trim contenteditable>
+            </code>
+        </pre>
+
+    </section>
+</section>
+
+<section>
+    <section>
+        <h3>Data driven tests</h3>
+        <p>
+            ... the dreaded <strong>Parameterized</strong> runner
+        </p>
+        <p class="fragment">
+            What about data driven with Spring context?
+        </p>
+        <p class="fragment">
+            No out of the box solution.
+        </p>
+    </section>
+
+    <section>
+        <h3>Welcome Spock</h3>
+        <p>
+           ... an expressive testing and specification framework
+        </p>
+        <p>
+            brings new meaning to data driven
+        </p>
+        <p>
+            Written in Groovy, inspired by others*, compatible with JUnit
+        </p>
+        <p>
+            <small>*JUnit, jMock, Mockito, RSpec...</small>
+        </p>
+    </section>
+
+    <section>
+        <h3>Sneak peek...</h3>
+        <pre>
+            <code data-trim contenteditable>
+            </code>
+        </pre>
+    </section>
+</section>
+
+<section>
+
+    <h3>Questions?</h3>
+</section>
 <!--<section>-->
 <!--<h2>Pretty Code</h2>-->
 <!--<pre><code data-trim contenteditable>-->

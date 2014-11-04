@@ -20,8 +20,8 @@ class UglyJavaGroovyWayController {
 
     def list = thirdPartyService.onlyWayToGetData()
 
-    model.addAttribute("countWithBooleanTrue", list.count { UglyJavaModel ugly ->
-      ugly?.nested?.nested?.nested?.theAllImportantBoolean
+    model.addAttribute("countWithBooleanTrue", list.count {
+      it?.nested?.nested?.nested?.theAllImportantBoolean
     })
 
     model.addAttribute("topThree", list.sort { a, b ->
