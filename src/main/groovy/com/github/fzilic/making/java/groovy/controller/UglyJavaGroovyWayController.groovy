@@ -25,7 +25,7 @@ class UglyJavaGroovyWayController {
     })
 
     model.addAttribute("topThree", list.sort { a, b ->
-      a.nested.someMonetaryValue <=> b.nested.someMonetaryValue
+      b.nested.someMonetaryValue <=> a.nested.someMonetaryValue
     }[0..2]*.someName)
 
     return "ugly"

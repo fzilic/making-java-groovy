@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+    <contextName>making-java-groovy</contextName>
+    <property name="ROOT_DIR" value="making-java-groovy"/>
+    <property name="MODULE_NAME" value="making-java-groovy"/>
+
+    <property name="PATTERN_DEFAULT"
+              value="[%date{dd.MM.yyyy HH:mm:ss.SSS}] : %-5level : %thread : %contextName : [%logger.%method:%line] : %message%n%exception"/>
+
+    <appender class="ch.qos.logback.core.ConsoleAppender" name="RootConsoleAppender">
+        <encoder>
+            <pattern>${PATTERN_DEFAULT}</pattern>
+        </encoder>
+    </appender>
+    <root level="WARN">
+        <appender-ref ref="RootConsoleAppender"/>
+    </root>
+
+    <logger name="com.github.fzilic">
+        <level value="debug"/>
+    </logger>
+
+    <logger name="org.springframework">
+        <level value="warn"/>
+    </logger>
+
+</configuration>

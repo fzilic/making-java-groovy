@@ -309,7 +309,7 @@
                 count with <strong>theAllImportantBoolean</strong> true
             </li>
             <li>
-                top three sorted by <strong>someMonetaryValue</strong>
+                top three sorted by <strong>someMonetaryValue</strong> descending
             </li>
         </ul>
     </section>
@@ -321,7 +321,7 @@
             Let's just count those they want
         </p>
         <pre>
-            <code data-trim contenteditable>
+            <code data-trim contenteditable class="java">
 final List&lt;UglyJavaModel&gt; list = thirdPartyService.onlyWayToGetData();
 
 int countOfThoseWithBooleanTrue = 0;
@@ -351,14 +351,14 @@ model.addAttribute("countWithBooleanTrue", countOfThoseWithBooleanTrue);
             And just top three
         </p>
         <pre>
-            <code data-trim contenteditable>
+            <code data-trim contenteditable class="java">
 final List&lt;UglyJavaModel&gt; list = thirdPartyService.onlyWayToGetData();
 
 list.sort(new Comparator&lt;UglyJavaModel>() {
   @Override
   public int compare(final UglyJavaModel left, final UglyJavaModel right) {
     return left.getNested().getSomeMonetaryValue()
-      .compareTo(right.getNested().getSomeMonetaryValue());
+      .compareTo(right.getNested().getSomeMonetaryValue()) * -1;
   }
 });
 
@@ -377,7 +377,7 @@ model.addAttribute("topThree", topThree);
             I know, this is boring
         </p>
         <pre>
-            <code data-trim contenteditable>
+            <code data-trim contenteditable class="groovy">
 def list = thirdPartyService.onlyWayToGetData()
 
 model.addAttribute("countWithBooleanTrue", list.count {
@@ -386,7 +386,7 @@ model.addAttribute("countWithBooleanTrue", list.count {
 
 model.addAttribute("topThree", list.sort {
     a, b -&gt;
-  a.nested.someMonetaryValue &lt;=&gt; b.nested.someMonetaryValue
+  b.nested.someMonetaryValue &lt;=&gt; a.nested.someMonetaryValue
 }[0..2]*.someName)
             </code>
         </pre>
@@ -426,7 +426,23 @@ model.addAttribute("topThree", list.sort {
         <h3>Classic JUnit4 test</h3>
 
         <pre>
-            <code data-trim contenteditable>
+            <code data-trim contenteditable class="java">
+@RunWith(MockitoJUnitRunner.class) //omitted imports - Mockito, Assertions
+public class TipicalJunitTest {
+  @Test //ommited mocks and prepare data
+  public void testUglyJavaControllerReturingCorrectCount() {
+    final UglyJavaController controller = new UglyJavaController(service);
+    final ArrayList&lt;UglyJavaModel&gt; uglyJavaModels = prepareData();
+    when(service.onlyWayToGetData()).thenReturn(uglyJavaModels);
+    final String view = controller.showSomething(model);
+    assertThat(view).isEqualTo("ugly");
+    verify(model).addAttribute(eq("countWithBooleanTrue"), eq(1));
+    verify(model).addAttribute(eq("topThree"), captor.capture());
+    verify(service).onlyWayToGetData();
+    verifyNoMoreInteractions(service, model);
+    assertThat(captor.getValue()).containsExactly("first","third","second");
+  }
+}
             </code>
         </pre>
     </section>
@@ -435,7 +451,24 @@ model.addAttribute("topThree", list.sort {
         <h3>Same test, Groovy Way</h3>
 
         <pre>
-            <code data-trim contenteditable>
+            <code data-trim contenteditable class="groovy">
+class GroovyJunitTest {
+  def data = [/* prepare data*/] // use mocks if you want
+  @Test
+  void testUglyJavaControllerReturingCorrectCount() {
+    def controller = new UglyJavaController([onlyWayToGetData: {
+      return data }] as ThirdPartyService)
+    assert controller.showSomething([addAttribute: { String attr, value -&gt;
+      if (attr == 'countWithBooleanTrue') {
+        assert value == 1
+      } else if (attr == 'topThree') {
+        assert value == ['first', 'third', 'second']
+      } else {
+        assert false
+      }
+    }] as Model) == 'ugly'
+  }
+}
             </code>
         </pre>
 
@@ -473,9 +506,40 @@ model.addAttribute("topThree", list.sort {
     </section>
 
     <section>
-        <h3>Sneak peek...</h3>
-        <pre>
-            <code data-trim contenteditable>
+        <!--<h3>Sneak peek...</h3>-->
+        <pre style="width: 1000px">
+            <code data-trim contenteditable class="groovy" style="max-height: 700px">
+@ContextConfiguration(['classpath:spring/test-config.xml'])
+class SneakPeekSpockSpecification extends Specification {
+  @Autowired
+  SimpleSpringService service
+
+  @Unroll
+  void "just a simple sneak peak for spock"() {
+    given:
+    def testService = new SpockDemoService(service)
+    expect: "dependencies are met"
+    service
+
+    when: "calculate average for #booleanValue #givenValues.inspect()"
+    def average = testService.averageValueFor(booleanValue, givenValues.collect {
+      return new UglyJavaModel(nested:
+          new UglyJavaModelNested(someMonetaryValue: it.d, nested:
+              new UglyJavaModelNestedNested(nested:
+                  new UglyJavaModelNestedNestedNested(theAllImportantBoolean: it.b))))
+    })
+
+    then: "average value should be #expected"
+    average == expected
+
+    where:
+    booleanValue|givenValues                                        || expected
+    true        |[[b:true,d:42.98],[b:false,d:4.3],[b:true,d:27.31]]||35.14
+    false       |[[b:true,d:42.98],[b:false,d:4.3],[b:true,d:27.31]]||4.3
+    true        |[[b:true,d:42.98],[b:true,d:4.3],[b:true,d:27.31]] ||24.86
+  }
+}
+
             </code>
         </pre>
     </section>
@@ -483,28 +547,16 @@ model.addAttribute("topThree", list.sort {
 
 <section>
 
-    <h3>Questions?</h3>
+
+    <p>
+        <small><a href="https://github.com/fzilic/making-java-groovy">https://github.com/fzilic/making-java-groovy</a></small>
+    </p>
+    <p>
+        <img src="images/qrcode.svg">
+    </p>
+
+    <h3 class="fragment">Questions?</h3>
 </section>
-<!--<section>-->
-<!--<h2>Pretty Code</h2>-->
-<!--<pre><code data-trim contenteditable>-->
-<!--function linkify( selector ) {-->
-<!--if( supports3DTransforms ) {-->
-
-<!--var nodes = document.querySelectorAll( selector );-->
-
-<!--for( var i = 0, len = nodes.length; i &lt; len; i++ ) {-->
-<!--var node = nodes[i];-->
-
-<!--if( !node.className ) {-->
-<!--node.className += ' roll';-->
-<!--}-->
-<!--}-->
-<!--}-->
-<!--}-->
-<!--</code></pre>-->
-<!--<p>Courtesy of <a href="http://softwaremaniacs.org/soft/highlight/en/description/">highlight.js</a>.</p>-->
-<!--</section>-->
 
 
 </div>

@@ -34,7 +34,7 @@ public class UglyJavaController {
     list.sort(new Comparator<UglyJavaModel>() {
       @Override
       public int compare(final UglyJavaModel left, final UglyJavaModel right) {
-        return left.getNested().getSomeMonetaryValue().compareTo(right.getNested().getSomeMonetaryValue());
+        return left.getNested().getSomeMonetaryValue().compareTo(right.getNested().getSomeMonetaryValue()) * -1;
       }
     });
 
