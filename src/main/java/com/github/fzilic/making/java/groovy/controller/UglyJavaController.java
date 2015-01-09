@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -31,12 +32,14 @@ public class UglyJavaController {
     int countOfThoseWithBooleanTrue = 0;
 
     // sort by monetary value
-    list.sort(new Comparator<UglyJavaModel>() {
+    Collections.sort(list, new Comparator<UglyJavaModel>() {
       @Override
       public int compare(final UglyJavaModel left, final UglyJavaModel right) {
         return left.getNested().getSomeMonetaryValue().compareTo(right.getNested().getSomeMonetaryValue()) * -1;
       }
     });
+
+//    list.sort();
 
     for (final UglyJavaModel uglyJavaModel : list) {
       if (uglyJavaModel.getNested() != null
